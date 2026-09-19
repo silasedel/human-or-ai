@@ -157,16 +157,20 @@ HMAC-signed cookie, unrelated to user accounts. Admin can:
 
 ### Vercel + hosted Postgres (recommended)
 
-1. Create a Postgres database on [Neon](https://neon.tech), [Supabase](https://supabase.com) or
-   similar and copy the connection string (use the direct/session-mode string, not a transaction
-   pooler, so migrations can run).
-2. Push this repo to GitHub and import it in Vercel.
-3. Add the environment variables from the table above (`DATABASE_URL`, `SESSION_SECRET`,
-   `ADMIN_PASSWORD`, plus AI keys and `CRON_SECRET` if you want generation).
-4. Set the **Build Command** to `npm run vercel-build` (it runs `prisma migrate deploy` before
-   `next build`), or run migrations yourself with `DATABASE_URL=... npm run db:deploy`.
-5. Deploy. Then seed either from your machine (`DATABASE_URL=<prod> npm run db:seed`) or from
-   **Admin → Generate → Load seed personas & posts**.
+1. Push this repo to GitHub and import it in Vercel (**Add New → Project**).
+2. Set the **Build Command** to `npm run vercel-build`. It runs `prisma migrate deploy` before
+   `next build`, using `DATABASE_URL_UNPOOLED` / `DIRECT_URL` for the migration when one exists
+   (pooled connections can't run migrations) and `DATABASE_URL` otherwise.
+3. Add the environment variables from the table above (`SESSION_SECRET`, `ADMIN_PASSWORD`, plus AI
+   keys and `CRON_SECRET` if you want generation). The import screen pre-fills the keys from
+   `.env.example`.
+4. Add a database: in the project's **Storage** tab choose **Create Database → Neon** (or
+   Supabase / Prisma Postgres). Connecting it to the project injects `DATABASE_URL` (and, for
+   Neon, `DATABASE_URL_UNPOOLED`) automatically. Alternatively create a database anywhere and set
+   `DATABASE_URL` yourself (use a direct/session-mode connection string so migrations can run).
+5. Deploy. Then seed either from **Admin → Generate → Load seed personas & posts** (uses
+   `ADMIN_PASSWORD`, no terminal needed) or from your machine with
+   `DATABASE_URL=<prod url> npm run db:seed`.
 
 `vercel.json` already contains the daily cron. Server functions that call the model declare
 `maxDuration = 300`.
