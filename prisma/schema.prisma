@@ -1,0 +1,135 @@
+// Prisma schema for Human? — a social feed where you guess whether each post
+// was written by a human or an AI.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// Shared enum: who wrote something. Used for account type, the true
+/// classification of a post, and the type a player guessed.
+enum AuthorType {
+  HUMAN
+  AI
+}
+
+model User {
+  id          String     @id @default(cuid())
+  /// Lowercase, unique handle (3-20 chars, a-z 0-9 _)
+  username    String     @unique
+  displayName String
+  /// bcrypt hash of the 4-digit PIN. Null for AI accounts (they can never log in).
+  pinHash     String?
+  bio         String     @default("")
+  /// Avatar URL. Either an external https URL, a generated avatar
+  /// (/api/avatars/gen/...) or an uploaded one (/api/avatars/u/{id}?v=...).
+  profileImage String?
+  accountType AuthorType @default(HUMAN)
+
+  /// AI accounts only: persistent personality / writing-style profile that the
+  /// generator uses when producing new posts for this account.
+  persona       Json?
+  /// AI accounts only: relative posting frequency when generating batches.
+  postingWeight Float @default(1)
+
+  /// Denormalized guessing stats (kept in sync inside the guess transaction).
+  guessCount   Int @default(0)
+  correctCount Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  posts    Post[]
+  guesses  Guess[]
+  likes    Like[]
+  sessions Session[]
+  avatar   Avatar?
+
+  @@index([accountType])
+}
+
+/// Uploaded profile pictures live in the database so deployment needs no
+/// external object storage. See src/lib/avatars.ts for the storage interface.
+model Avatar {
+  userId    String   @id
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  data      Bytes
+  mimeType  String
+  updatedAt DateTime @updatedAt
+}
+
+model Post {
+  id       String     @id @default(cuid())
+  authorId String
+  author   User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  text     String
+  /// The secret truth. Never sent to the client before the viewer has guessed.
+  actualType AuthorType
+
+  likeCount       Int @default(0)
+  humanGuessCount Int @default(0)
+  aiGuessCount    Int @default(0)
+
+  /// Posts can be scheduled into the future; the feed only shows createdAt <= now().
+  createdAt DateTime @default(now())
+
+  guesses Guess[]
+  likes   Like[]
+
+  @@index([authorId, createdAt(sort: Desc)])
+  @@index([createdAt(sort: Desc)])
+}
+
+/// One guess per (user, post) or per (guest cookie, post).
+model Guess {
+  id          String     @id @default(cuid())
+  userId      String?
+  user        User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// Anonymous visitors get a guest id cookie so they can play before signing up.
+  guestId     String?
+  postId      String
+  post        Post       @relation(fields: [postId], references: [id], onDelete: Cascade)
+  guessedType AuthorType
+  correct     Boolean
+  createdAt   DateTime   @default(now())
+
+  @@unique([userId, postId])
+  @@unique([guestId, postId])
+  @@index([postId])
+}
+
+model Like {
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([userId, postId])
+  @@index([postId])
+}
+
+/// Persistent login sessions. The cookie holds a random token; we store its
+/// SHA-256 so a database leak does not hand out usable sessions.
+model Session {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+/// Fixed-window rate limiting that works across serverless instances.
+model RateLimit {
+  key     String   @id
+  count   Int
+  resetAt DateTime
+}
