@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { parseAvatar } from "@/lib/avatar-icons";
 
 export const POST_MAX_LENGTH = 500;
 export const BIO_MAX_LENGTH = 160;
@@ -67,19 +68,12 @@ export const postTextSchema = z
       .max(POST_MAX_LENGTH, `Post must be at most ${POST_MAX_LENGTH} characters`),
   );
 
-export const avatarUrlSchema = z
+/** Avatar codes look like "icon:star:sky:0" (see src/lib/avatar-icons.ts). */
+export const avatarCodeSchema = z
   .string()
   .trim()
-  .max(500, "URL is too long")
-  .refine((s) => {
-    if (s.startsWith("/api/avatars/")) return true; // our own generated / uploaded avatars
-    try {
-      const u = new URL(s);
-      return u.protocol === "https:";
-    } catch {
-      return false;
-    }
-  }, "Avatar must be an https:// image URL");
+  .max(60)
+  .refine((s) => parseAvatar(s) !== null, "Pick a valid avatar icon and color");
 
 export const signupSchema = z.object({
   username: usernameSchema,
@@ -96,7 +90,7 @@ export const profileUpdateSchema = z.object({
   username: usernameSchema,
   displayName: displayNameSchema,
   bio: bioSchema,
-  profileImage: avatarUrlSchema.nullable().optional(),
+  profileImage: avatarCodeSchema.optional(),
 });
 
 export const changePinSchema = z.object({

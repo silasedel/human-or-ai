@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { createSession, getGuestId, hashPin, migrateGuestGuesses } from "@/lib/auth";
-import { randomGeneratedAvatarUrl } from "@/lib/avatars";
+import { randomAvatarCode } from "@/lib/avatar-icons";
 import { prisma } from "@/lib/db";
 import { assertSameOrigin, getClientIp, jsonError, readJson, route } from "@/lib/http";
 import { enforceRateLimit } from "@/lib/rate-limit";
@@ -26,7 +26,7 @@ export const POST = route(async (req) => {
         displayName,
         pinHash: await hashPin(pin),
         accountType: "HUMAN",
-        profileImage: randomGeneratedAvatarUrl(username),
+        profileImage: randomAvatarCode(),
       },
       select: { id: true, username: true },
     });

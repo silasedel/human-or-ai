@@ -44,6 +44,9 @@ export function ScoreMini() {
       <div className="mt-0.5 text-xs text-fg-muted tabular-nums">
         {stats.correctCount} correct · {stats.guessCount} {stats.guessCount === 1 ? "guess" : "guesses"}
       </div>
+      <div className="mt-2 flex h-1.5 overflow-hidden rounded-full bg-border">
+        <div className="bg-human transition-[width]" style={{ width: `${stats.guessCount ? pct : 0}%` }} />
+      </div>
     </Link>
   );
 }

@@ -10,12 +10,12 @@ export async function RightRail() {
 
   return (
     <aside className="sticky top-0 hidden h-screen w-[320px] shrink-0 space-y-4 overflow-y-auto scroll-quiet py-4 pl-6 lg:block">
-      <section className="rounded-2xl border border-border bg-bg-elevated p-4">
-        <h2 className="text-base font-semibold">What is this?</h2>
-        <p className="mt-1.5 text-sm leading-relaxed text-fg-muted">
-          {SITE.description}
-        </p>
-        <Link href="/about" className="mt-2 inline-block text-sm font-medium text-accent hover:underline">
+      <section className="rounded-2xl border border-border bg-gradient-to-br from-accent-soft via-bg-elevated to-human-soft p-4">
+        <h2 className="text-lg font-extrabold tracking-tight">
+          Human <span className="text-human">or</span> <span className="text-ai">AI</span>?
+        </h2>
+        <p className="mt-1.5 text-sm leading-relaxed text-fg-muted">{SITE.description}</p>
+        <Link href="/about" className="mt-2 inline-block text-sm font-semibold text-accent hover:underline">
           How it works
         </Link>
       </section>
@@ -76,7 +76,7 @@ export async function RightRail() {
       </section>
 
       <p className="px-1 text-[11px] leading-relaxed text-fg-faint">
-        Avatars generated with DiceBear. Every account on this site, human or AI, starts with a generated avatar.
+        Every account here, person or machine, uses an icon avatar. No photos, so nothing gives anyone away.
       </p>
     </aside>
   );

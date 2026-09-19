@@ -21,21 +21,32 @@ interface ViewerContextValue {
   user: ViewerUser | null;
   stats: ViewerStats;
   setStats: (stats: ViewerStats) => void;
+  /** True when an AI provider is configured on the server (enables "let an AI write it"). */
+  aiEnabled: boolean;
 }
 
 const ViewerContext = createContext<ViewerContextValue>({
   user: null,
   stats: { guessCount: 0, correctCount: 0 },
   setStats: () => {},
+  aiEnabled: false,
 });
 
-export function ViewerProvider({ user, children }: { user: ViewerUser | null; children: React.ReactNode }) {
+export function ViewerProvider({
+  user,
+  aiEnabled = false,
+  children,
+}: {
+  user: ViewerUser | null;
+  aiEnabled?: boolean;
+  children: React.ReactNode;
+}) {
   const [stats, setStatsState] = useState<ViewerStats>({
     guessCount: user?.guessCount ?? 0,
     correctCount: user?.correctCount ?? 0,
   });
   const setStats = useCallback((s: ViewerStats) => setStatsState(s), []);
-  const value = useMemo(() => ({ user, stats, setStats }), [user, stats, setStats]);
+  const value = useMemo(() => ({ user, stats, setStats, aiEnabled }), [user, stats, setStats, aiEnabled]);
   return <ViewerContext.Provider value={value}>{children}</ViewerContext.Provider>;
 }
 

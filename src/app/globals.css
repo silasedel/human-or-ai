@@ -4,56 +4,58 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* ---------------------------------------------------------------------------
-   Design tokens. Change --accent to re-skin the whole site.
+   Design tokens. Bright, high-contrast, social-network feel: white surfaces,
+   hairline separators, one saturated blue for actions, green = human,
+   orange = AI, pink for likes. Change these to re-skin the whole site.
    --------------------------------------------------------------------------- */
 :root {
   --bg: #ffffff;
-  --bg-subtle: #f7f7f8;
+  --bg-subtle: #f4f7f9;
   --bg-elevated: #ffffff;
-  --fg: #111113;
-  --fg-muted: #6b6f76;
-  --fg-faint: #9a9ea6;
-  --border: #e6e7ea;
-  --border-strong: #d4d6db;
+  --fg: #0f1419;
+  --fg-muted: #536471;
+  --fg-faint: #8b98a5;
+  --border: #e8eef2;
+  --border-strong: #cfd9de;
 
-  --accent: #5b5bd6;
-  --accent-strong: #4646c4;
-  --accent-soft: #eef0ff;
+  --accent: #1d9bf0;
+  --accent-strong: #1a8cd8;
+  --accent-soft: #e6f3fd;
   --accent-fg: #ffffff;
 
-  --human: #1a9d5a;
-  --human-soft: #e6f7ee;
-  --ai: #8b4fd6;
-  --ai-soft: #f1e9fb;
+  --human: #0e9f6e;
+  --human-soft: #e2f7ed;
+  --ai: #f4720b;
+  --ai-soft: #fff0e1;
 
-  --like: #e0245e;
-  --success: #1a9d5a;
-  --danger: #d6404f;
+  --like: #f91880;
+  --success: #0e9f6e;
+  --danger: #f4212e;
 }
 
 .dark {
-  --bg: #0c0c0e;
-  --bg-subtle: #131316;
-  --bg-elevated: #17171b;
-  --fg: #f1f1f3;
-  --fg-muted: #9a9ea8;
-  --fg-faint: #6a6e78;
-  --border: #232329;
-  --border-strong: #33333b;
+  --bg: #0c1014;
+  --bg-subtle: #151b21;
+  --bg-elevated: #131920;
+  --fg: #e7e9ea;
+  --fg-muted: #8b98a5;
+  --fg-faint: #5b6b7b;
+  --border: #243039;
+  --border-strong: #37454f;
 
-  --accent: #7c7cf0;
-  --accent-strong: #9a9af7;
-  --accent-soft: #1f1f3a;
-  --accent-fg: #0c0c0e;
+  --accent: #1d9bf0;
+  --accent-strong: #4ab3f4;
+  --accent-soft: #10283a;
+  --accent-fg: #ffffff;
 
-  --human: #3ccb7f;
-  --human-soft: #10281c;
-  --ai: #b48cf2;
-  --ai-soft: #251a3a;
+  --human: #22c585;
+  --human-soft: #0f2b21;
+  --ai: #ff8c42;
+  --ai-soft: #33210f;
 
-  --like: #f4527e;
-  --success: #3ccb7f;
-  --danger: #f06b78;
+  --like: #f91880;
+  --success: #22c585;
+  --danger: #ff5c68;
 }
 
 @theme inline {
@@ -102,11 +104,16 @@ body {
   overflow-wrap: anywhere;
 }
 
-/* Subtle focus rings that match the accent. */
+/* Focus rings that match the accent. */
 :where(button, a, input, textarea, select):focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
   border-radius: 6px;
+}
+
+/* Two-tone brand mark: green (human) meets orange (AI). */
+.brand-mark {
+  background: linear-gradient(135deg, var(--human) 0%, var(--human) 50%, var(--ai) 50%, var(--ai) 100%);
 }
 
 /* Reveal animation for guess results. */

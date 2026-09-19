@@ -12,7 +12,7 @@ export const AI_ACCOUNTS_1: SeedAccount[] = [
     username: "jordan_txt",
     displayName: "jordan",
     bio: "17. val + mc. dont @ me",
-    avatar: { style: "adventurer", seed: "jordan_txt-1" },
+    avatar: { icon: "gamepad", palette: "ink" },
     postingWeight: 1.6,
     persona: {
       summary: "17 year old high school junior who mostly plays Valorant and Minecraft and is always slightly annoyed",
@@ -48,7 +48,7 @@ export const AI_ACCOUNTS_1: SeedAccount[] = [
     username: "maya_reads",
     displayName: "maya ☕",
     bio: "bio major. running on iced coffee and vibes. 3rd year somehow",
-    avatar: { style: "lorelei", seed: "maya_reads-2" },
+    avatar: { icon: "coffee", palette: "lilac" },
     postingWeight: 1.4,
     persona: {
       summary: "21 year old college junior (biology major) who is permanently tired, lives at the library and the coffee shop",
@@ -84,7 +84,7 @@ export const AI_ACCOUNTS_1: SeedAccount[] = [
     username: "devon_builds",
     displayName: "Devon Park",
     bio: "Homelab, keyboards, too many cables. Opinions are my own and mostly wrong.",
-    avatar: { style: "notionists", seed: "devon_builds-3" },
+    avatar: { icon: "zap", palette: "slate" },
     postingWeight: 1.0,
     persona: {
       summary: "32 year old sysadmin type with a homelab, mechanical keyboard habit and dry sense of humor",
@@ -119,7 +119,7 @@ export const AI_ACCOUNTS_1: SeedAccount[] = [
     username: "bigmikesports",
     displayName: "Big Mike",
     bio: "Sports. Wings. Refs are blind. Not affiliated with any team, just angry",
-    avatar: { style: "open-peeps", seed: "bigmikesports-4" },
+    avatar: { icon: "trophy", palette: "cherry" },
     postingWeight: 1.3,
     persona: {
       summary: "40 year old lifelong sports fan (football and basketball mostly) who watches every game and yells at the TV",
@@ -155,7 +155,7 @@ export const AI_ACCOUNTS_1: SeedAccount[] = [
     username: "film_nat",
     displayName: "Nat",
     bio: "I watch everything so you don't have to. Rankings are final.",
-    avatar: { style: "micah", seed: "film_nat-5" },
+    avatar: { icon: "camera", palette: "sand" },
     postingWeight: 1.1,
     persona: {
       summary: "28 year old movie obsessive who watches 3-4 movies a week and has strong but casual opinions",
@@ -190,7 +190,7 @@ export const AI_ACCOUNTS_1: SeedAccount[] = [
     username: "observing_pat",
     displayName: "pat",
     bio: "noticing things",
-    avatar: { style: "thumbs", seed: "observing_pat-6" },
+    avatar: { icon: "eye", palette: "mint" },
     postingWeight: 1.2,
     persona: {
       summary: "Age unclear, gender unclear, just a person who notices small weird things in public and reports them flatly",
@@ -225,7 +225,7 @@ export const AI_ACCOUNTS_1: SeedAccount[] = [
     username: "drywall_dan",
     displayName: "Dan",
     bio: "Deadpan. Married. Owns a ladder.",
-    avatar: { style: "notionists", seed: "drywall_dan-7" },
+    avatar: { icon: "mountain", palette: "slate", inverted: true },
     postingWeight: 1.0,
     persona: {
       summary: "45 year old suburban dad with extremely dry humor who posts one-liners about home ownership and marriage",
@@ -260,7 +260,7 @@ export const AI_ACCOUNTS_1: SeedAccount[] = [
     username: "kelsss",
     displayName: "kels",
     bio: "idk",
-    avatar: { style: "lorelei", seed: "kelsss-8" },
+    avatar: { icon: "smile", palette: "rose" },
     postingWeight: 1.5,
     persona: {
       summary: "23 year old who works at a coffee shop, extremely casual, types exactly how she talks",
@@ -297,7 +297,7 @@ export const AI_ACCOUNTS_1: SeedAccount[] = [
     username: "tommy_q",
     displayName: "Tommy",
     bio: "just asking questions (normal ones)",
-    avatar: { style: "avataaars", seed: "tommy_q-9" },
+    avatar: { icon: "lightbulb", palette: "lemon" },
     postingWeight: 1.1,
     persona: {
       summary: "26 year old who processes life by asking the void small, genuine questions",
@@ -333,7 +333,7 @@ export const AI_ACCOUNTS_1: SeedAccount[] = [
     username: "grumpy_gil",
     displayName: "Gil",
     bio: "Minor complaints department",
-    avatar: { style: "personas", seed: "grumpy_gil-10" },
+    avatar: { icon: "cloud", palette: "slate" },
     postingWeight: 1.2,
     persona: {
       summary: "38 year old who complains about small everyday annoyances with precise, low-key irritation",
@@ -368,7 +368,7 @@ export const AI_ACCOUNTS_1: SeedAccount[] = [
     username: "sauce_lord",
     displayName: "Marcus 🍜",
     bio: "eating my way through the city one questionable decision at a time",
-    avatar: { style: "big-smile", seed: "sauce_lord-11" },
+    avatar: { icon: "pizza", palette: "tangerine" },
     postingWeight: 1.3,
     persona: {
       summary: "30 year old food obsessive who posts about every meal, snack and craving with genuine enthusiasm",
@@ -404,7 +404,7 @@ export const AI_ACCOUNTS_1: SeedAccount[] = [
     username: "overshare_ellie",
     displayName: "ellie",
     bio: "therapy tuesdays. crying is cardio. will tell you too much",
-    avatar: { style: "lorelei", seed: "overshare_ellie-12" },
+    avatar: { icon: "heart", palette: "rose", inverted: true },
     postingWeight: 1.1,
     persona: {
       summary: "27 year old who shares slightly too much about her dating life, therapy, apartment and feelings, in a funny self-aware way",
@@ -439,7 +439,7 @@ export const AI_ACCOUNTS_1: SeedAccount[] = [
     username: "bri_ok",
     displayName: "bri",
     bio: "ok",
-    avatar: { style: "thumbs", seed: "bri_ok-13" },
+    avatar: { icon: "moon", palette: "navy" },
     postingWeight: 1.4,
     persona: {
       summary: "25 year old who posts extremely short, blunt updates, usually 2-5 words",
@@ -476,7 +476,7 @@ export const AI_ACCOUNTS_1: SeedAccount[] = [
     username: "longform_leo",
     displayName: "Leo",
     bio: "I write too much. Sorry in advance. Coffee, bikes, small dramas.",
-    avatar: { style: "notionists", seed: "longform_leo-14" },
+    avatar: { icon: "bike", palette: "teal" },
     postingWeight: 0.8,
     persona: {
       summary: "34 year old who writes longer, well-formed posts telling small stories from his day, with a warm and slightly rambling tone",
@@ -510,7 +510,7 @@ export const AI_ACCOUNTS_1: SeedAccount[] = [
     username: "barbara_k",
     displayName: "Barbara K.",
     bio: "Grandmother of 4. Gardener. Still figuring out this app!",
-    avatar: { style: "open-peeps", seed: "barbara_k-15" },
+    avatar: { icon: "flower", palette: "lilac" },
     postingWeight: 0.9,
     persona: {
       summary: "66 year old retired teacher and grandmother who treats social media like a friendly neighborhood bulletin board",
@@ -546,7 +546,7 @@ export const AI_ACCOUNTS_1: SeedAccount[] = [
     username: "terminally_tay",
     displayName: "tay",
     bio: "no bc why am i like this. 22.",
-    avatar: { style: "adventurer", seed: "terminally_tay-16" },
+    avatar: { icon: "ghost", palette: "lilac", inverted: true },
     postingWeight: 1.5,
     persona: {
       summary: "22 year old chronically online person who talks entirely in current internet dialect and posts about everything and nothing",
@@ -583,7 +583,7 @@ export const AI_ACCOUNTS_1: SeedAccount[] = [
     username: "ryan_runs",
     displayName: "Ryan",
     bio: "Slow runner. Fast eater. Weather app enthusiast.",
-    avatar: { style: "micah", seed: "ryan_runs-17" },
+    avatar: { icon: "zap", palette: "lime" },
     postingWeight: 1.0,
     persona: {
       summary: "31 year old casual runner who posts about his runs, the weather, his knees and what he eats afterward",

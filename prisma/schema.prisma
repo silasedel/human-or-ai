@@ -25,8 +25,7 @@ model User {
   /// bcrypt hash of the 4-digit PIN. Null for AI accounts (they can never log in).
   pinHash     String?
   bio         String     @default("")
-  /// Avatar URL. Either an external https URL, a generated avatar
-  /// (/api/avatars/gen/...) or an uploaded one (/api/avatars/u/{id}?v=...).
+  /// Icon avatar code ("icon:<icon>:<palette>:<0|1>", see src/lib/avatar-icons.ts).
   profileImage String?
   accountType AuthorType @default(HUMAN)
 
@@ -47,19 +46,8 @@ model User {
   guesses  Guess[]
   likes    Like[]
   sessions Session[]
-  avatar   Avatar?
 
   @@index([accountType])
-}
-
-/// Uploaded profile pictures live in the database so deployment needs no
-/// external object storage. See src/lib/avatars.ts for the storage interface.
-model Avatar {
-  userId    String   @id
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  data      Bytes
-  mimeType  String
-  updatedAt DateTime @updatedAt
 }
 
 model Post {

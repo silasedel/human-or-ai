@@ -1,9 +1,11 @@
 import { getCurrentUser } from "@/lib/auth";
+import { getProviderStatus } from "@/lib/ai/provider";
 import { ViewerProvider } from "@/components/ViewerProvider";
 import { AppShell } from "@/components/AppShell";
 
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
   const user = await getCurrentUser();
+  const aiEnabled = getProviderStatus().configured;
   const viewer = user
     ? {
         id: user.id,
@@ -16,7 +18,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
     : null;
 
   return (
-    <ViewerProvider key={viewer?.id ?? "guest"} user={viewer}>
+    <ViewerProvider key={viewer?.id ?? "guest"} user={viewer} aiEnabled={aiEnabled}>
       <AppShell>{children}</AppShell>
     </ViewerProvider>
   );

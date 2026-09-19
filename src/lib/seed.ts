@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db";
-import { generatedAvatarUrl } from "@/lib/avatars";
+import { encodeAvatar } from "@/lib/avatar-icons";
 import { personaSchema } from "@/lib/ai/personas";
 import { AI_ACCOUNTS, type SeedAccount } from "../../prisma/seed-data";
 
@@ -60,7 +60,7 @@ export async function seedAiAccounts(opts: SeedOptions = {}): Promise<SeedResult
     const data = {
       displayName: account.displayName,
       bio: account.bio,
-      profileImage: generatedAvatarUrl(account.avatar.style, account.avatar.seed),
+      profileImage: encodeAvatar({ icon: account.avatar.icon, palette: account.avatar.palette, inverted: account.avatar.inverted ?? false }),
       accountType: "AI" as const,
       persona,
       postingWeight: account.postingWeight,

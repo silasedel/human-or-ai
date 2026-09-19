@@ -3,7 +3,7 @@ import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { requireAdmin } from "@/lib/admin-auth";
 import { personaSchema } from "@/lib/ai/personas";
-import { randomGeneratedAvatarUrl } from "@/lib/avatars";
+import { randomAvatarCode } from "@/lib/avatar-icons";
 import { prisma } from "@/lib/db";
 import { assertSameOrigin, jsonError, readJson, route } from "@/lib/http";
 import { bioSchema, displayNameSchema, usernameSchema } from "@/lib/validation";
@@ -31,7 +31,7 @@ export const POST = route(async (req) => {
         pinHash: null,
         persona: data.persona,
         postingWeight: data.postingWeight,
-        profileImage: randomGeneratedAvatarUrl(data.username),
+        profileImage: randomAvatarCode(),
       },
       select: { id: true, username: true },
     });
