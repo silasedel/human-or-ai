@@ -39,6 +39,12 @@ model User {
   guessCount   Int @default(0)
   correctCount Int @default(0)
 
+  /// Login protection: consecutive failed sign-ins (reset on success) and an
+  /// escalating lock so a 4-digit PIN cannot be enumerated online.
+  failedLoginCount  Int       @default(0)
+  lockedUntil       DateTime?
+  lastFailedLoginAt DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

@@ -51,7 +51,40 @@ export const displayNameSchema = z
       .refine((s) => !s.includes("\n"), "Display name cannot contain line breaks"),
   );
 
-export const pinSchema = z.string().regex(/^\d{4}$/, "PIN must be exactly 4 digits");
+export const PIN_MIN_LENGTH = 4;
+export const PIN_MAX_LENGTH = 8;
+
+/** The most common PINs plus trivial patterns (all-same, sequences, repeated pairs, years). */
+const COMMON_PINS = new Set([
+  "1234", "0000", "1111", "2580", "4321", "1212", "6969", "2000", "1122", "9999", "1004", "4444",
+  "2222", "6666", "7777", "3333", "5555", "1313", "8888", "0852", "1010", "2001", "2468", "1357",
+  "0007", "0123", "3210", "7890", "0987", "1231", "1230", "4200", "6789", "9876", "2580", "0852",
+  "12345", "123456", "1234567", "12345678", "111111", "000000", "654321", "696969", "112233",
+]);
+
+export function isWeakPin(pin: string): boolean {
+  if (COMMON_PINS.has(pin)) return true;
+  if (/^(\d)\1+$/.test(pin)) return true; // 1111, 00000
+  const digits = pin.split("").map(Number);
+  const ascending = digits.every((d, i) => i === 0 || d === digits[i - 1] + 1);
+  const descending = digits.every((d, i) => i === 0 || d === digits[i - 1] - 1);
+  if (ascending || descending) return true;
+  if (/^(\d\d)\1+$/.test(pin)) return true; // 1212, 121212
+  const asYear = Number(pin);
+  if (pin.length === 4 && asYear >= 1900 && asYear <= 2035) return true; // birth years
+  return false;
+}
+
+/** Any syntactically valid PIN (used for sign-in). */
+export const pinSchema = z
+  .string()
+  .regex(new RegExp(`^\\d{${PIN_MIN_LENGTH},${PIN_MAX_LENGTH}}$`), `PIN must be ${PIN_MIN_LENGTH} to ${PIN_MAX_LENGTH} digits`);
+
+/** A PIN being *chosen* (sign-up, change PIN): also rejects easy-to-guess ones. */
+export const newPinSchema = pinSchema.refine(
+  (pin) => !isWeakPin(pin),
+  "That PIN is too easy to guess (like 1234, 0000 or a year). Pick a less obvious one.",
+);
 
 export const bioSchema = z
   .string()
@@ -78,7 +111,7 @@ export const avatarCodeSchema = z
 export const signupSchema = z.object({
   username: usernameSchema,
   displayName: displayNameSchema,
-  pin: pinSchema,
+  pin: newPinSchema,
 });
 
 export const loginSchema = z.object({
@@ -95,7 +128,7 @@ export const profileUpdateSchema = z.object({
 
 export const changePinSchema = z.object({
   currentPin: pinSchema,
-  newPin: pinSchema,
+  newPin: newPinSchema,
 });
 
 export const createPostSchema = z.object({

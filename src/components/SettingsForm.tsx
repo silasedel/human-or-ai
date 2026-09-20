@@ -6,7 +6,7 @@ import { encodeAvatar, fallbackAvatar, parseAvatar, type AvatarSpec } from "@/li
 import { AvatarPicker } from "@/components/AvatarPicker";
 import { Button, ErrorText, Hint, Input, Label, TextArea } from "@/components/ui";
 import { useSignOut } from "@/components/Sidebar";
-import { BIO_MAX_LENGTH, DISPLAY_NAME_MAX_LENGTH } from "@/lib/validation";
+import { BIO_MAX_LENGTH, DISPLAY_NAME_MAX_LENGTH, PIN_MAX_LENGTH, PIN_MIN_LENGTH } from "@/lib/validation";
 
 interface SettingsFormProps {
   initial: { username: string; displayName: string; bio: string; profileImage: string | null };
@@ -121,6 +121,7 @@ export function SettingsForm({ initial }: SettingsFormProps) {
 
       <form onSubmit={changePin} className="space-y-4 border-t border-border pt-8">
         <h2 className="font-semibold">Change PIN</h2>
+        <p className="text-sm text-fg-muted">{PIN_MIN_LENGTH} to {PIN_MAX_LENGTH} digits. Obvious PINs like 1234 or a year are rejected.</p>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <Label htmlFor="currentPin">Current PIN</Label>
@@ -130,7 +131,7 @@ export function SettingsForm({ initial }: SettingsFormProps) {
               inputMode="numeric"
               autoComplete="current-password"
               value={currentPin}
-              onChange={(e) => setCurrentPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
+              onChange={(e) => setCurrentPin(e.target.value.replace(/\D/g, "").slice(0, PIN_MAX_LENGTH))}
               className="tracking-[0.4em]"
             />
           </div>
@@ -142,14 +143,14 @@ export function SettingsForm({ initial }: SettingsFormProps) {
               inputMode="numeric"
               autoComplete="new-password"
               value={newPin}
-              onChange={(e) => setNewPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
+              onChange={(e) => setNewPin(e.target.value.replace(/\D/g, "").slice(0, PIN_MAX_LENGTH))}
               className="tracking-[0.4em]"
             />
           </div>
         </div>
         <ErrorText>{pinError}</ErrorText>
         {pinMessage && <p className="text-sm text-success">{pinMessage}</p>}
-        <Button type="submit" variant="secondary" loading={pinBusy} disabled={currentPin.length !== 4 || newPin.length !== 4}>
+        <Button type="submit" variant="secondary" loading={pinBusy} disabled={currentPin.length < PIN_MIN_LENGTH || newPin.length < PIN_MIN_LENGTH}>
           Update PIN
         </Button>
       </form>

@@ -6,6 +6,7 @@ import { useState } from "react";
 import { LogoMark } from "@/components/Logo";
 import { Button, ErrorText, Hint, Input, Label } from "@/components/ui";
 import { SITE } from "@/lib/branding";
+import { PIN_MAX_LENGTH, PIN_MIN_LENGTH } from "@/lib/validation";
 
 interface AuthFormProps {
   mode: "signup" | "login";
@@ -38,9 +39,12 @@ export function AuthForm({ mode }: AuthFormProps) {
         headers: { "content-type": "application/json" },
         body: JSON.stringify(isSignup ? { username, displayName, pin } : { username, pin }),
       });
-      const data = (await res.json()) as { error?: string };
+      const data = (await res.json()) as { error?: string; failedAttempts?: number };
       if (!res.ok) throw new Error(data.error ?? "Something went wrong");
-      router.push(next);
+      // Owner alert: surface failed sign-in attempts that happened since the last successful one.
+      const attempts = data.failedAttempts ?? 0;
+      const target = attempts >= 3 ? `${next}${next.includes("?") ? "&" : "?"}loginAttempts=${attempts}` : next;
+      router.push(target);
       router.refresh();
     } catch (err) {
       setError((err as Error).message);
@@ -90,7 +94,7 @@ export function AuthForm({ mode }: AuthFormProps) {
         )}
 
         <div>
-          <Label htmlFor="pin">4-digit PIN</Label>
+          <Label htmlFor="pin">PIN</Label>
           <Input
             id="pin"
             type="password"
@@ -98,17 +102,22 @@ export function AuthForm({ mode }: AuthFormProps) {
             pattern="[0-9]*"
             autoComplete={isSignup ? "new-password" : "current-password"}
             value={pin}
-            onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
+            onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, PIN_MAX_LENGTH))}
             placeholder="••••"
             className="tracking-[0.4em]"
             required
           />
-          {isSignup && <Hint>You&apos;ll use this to sign back in. It&apos;s stored hashed, never in plain text.</Hint>}
+          {isSignup && (
+            <Hint>
+              {PIN_MIN_LENGTH} digits, or up to {PIN_MAX_LENGTH} if you want extra safety. Obvious ones like 1234 are rejected.
+              It&apos;s stored hashed, never in plain text.
+            </Hint>
+          )}
         </div>
 
         <ErrorText>{error}</ErrorText>
 
-        <Button type="submit" size="lg" className="w-full" loading={loading} disabled={!username || pin.length !== 4 || (isSignup && !displayName)}>
+        <Button type="submit" size="lg" className="w-full" loading={loading} disabled={!username || pin.length < PIN_MIN_LENGTH || (isSignup && !displayName)}>
           {isSignup ? "Create account" : "Sign in"}
         </Button>
       </form>
