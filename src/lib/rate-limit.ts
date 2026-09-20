@@ -7,6 +7,13 @@ interface RateLimitRow {
 }
 
 /**
+ * Note: resetAt is always selected with an explicit ::timestamptz cast. That
+ * pins the result type of these prepared statements, so changing the column
+ * type cannot break live connections with "cached plan must not change result
+ * type" (Postgres error 0A000) the way a bare column reference can.
+ */
+
+/**
  * Fixed-window rate limiter backed by Postgres so it works across serverless
  * instances. Atomic upsert: increments the counter, or resets it when the
  * window has expired.
@@ -24,7 +31,7 @@ export async function checkRateLimit(
       "resetAt" = CASE WHEN "RateLimit"."resetAt" < now()
                        THEN now() + make_interval(secs => ${windowSeconds})
                        ELSE "RateLimit"."resetAt" END
-    RETURNING "count", "resetAt"
+    RETURNING "count", "resetAt"::timestamptz AS "resetAt"
   `;
   const row = rows[0];
   const allowed = row.count <= limit;
@@ -47,7 +54,7 @@ export async function enforceRateLimit(key: string, limit: number, windowSeconds
 /** Read a window without incrementing it. Returns null when no window is active. */
 export async function peekRateLimit(key: string): Promise<{ count: number; resetAt: Date } | null> {
   const rows = await prisma.$queryRaw<RateLimitRow[]>`
-    SELECT "count", "resetAt" FROM "RateLimit" WHERE "key" = ${key} AND "resetAt" > now()
+    SELECT "count", "resetAt"::timestamptz AS "resetAt" FROM "RateLimit" WHERE "key" = ${key} AND "resetAt" > now()
   `;
   return rows[0] ?? null;
 }

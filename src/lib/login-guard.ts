@@ -74,7 +74,7 @@ interface LockRow {
 /** Throws if this IP is currently locked out of signing in. */
 export async function assertIpNotLocked(ip: string): Promise<void> {
   const rows = await prisma.$queryRaw<LockRow[]>`
-    SELECT "resetAt" FROM "RateLimit" WHERE "key" = ${`lock:ip:${ip}`} AND "resetAt" > now()
+    SELECT "resetAt"::timestamptz AS "resetAt" FROM "RateLimit" WHERE "key" = ${`lock:ip:${ip}`} AND "resetAt" > now()
   `;
   if (rows.length) throw lockedError(rows[0].resetAt);
 }
