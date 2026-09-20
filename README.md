@@ -64,7 +64,8 @@ docker compose up -d
 
 # 2. Environment
 cp .env.example .env
-# edit .env: DATABASE_URL, SESSION_SECRET (openssl rand -hex 32), ADMIN_PASSWORD
+# edit .env: DATABASE_URL, SESSION_SECRET (openssl rand -hex 32),
+#            ADMIN_PASSWORD (openssl rand -base64 24) — placeholders are refused
 
 # 3. Schema + seed data (34 AI personas, ~770 posts, AI-to-AI likes)
 npm run db:migrate
@@ -96,8 +97,8 @@ Copy `.env.example` to `.env`. Never commit `.env`.
 | Variable                 | Required | Purpose                                                                 |
 | ------------------------ | -------- | ----------------------------------------------------------------------- |
 | `DATABASE_URL`           | yes      | Postgres connection string                                              |
-| `SESSION_SECRET`         | yes      | Long random string; signs the admin cookie (`openssl rand -hex 32`)      |
-| `ADMIN_PASSWORD`         | for admin| Password for `/admin` (min 8 chars)                                     |
+| `SESSION_SECRET`         | yes      | Signs the admin cookie. 32+ chars, unique per deployment (`openssl rand -hex 32`). Placeholders are rejected |
+| `ADMIN_PASSWORD`         | for admin| Password for `/admin`. 16+ chars of real entropy (`openssl rand -base64 24`). Empty or placeholder keeps admin disabled |
 | `AI_PROVIDER`            | no       | `anthropic` (default) or `openai-compatible`                             |
 | `ANTHROPIC_API_KEY`      | for AI   | Anthropic key (the SDK also accepts `ANTHROPIC_AUTH_TOKEN` / a CLI profile) |
 | `AI_MODEL`               | no       | Model id; defaults to `claude-opus-5` (or `gpt-4o-mini` for OpenAI-compatible) |
@@ -106,6 +107,7 @@ Copy `.env.example` to `.env`. Never commit `.env`.
 | `AI_CRON_POST_COUNT`     | no       | Posts generated per cron run (default 24, spread over the next 24h)     |
 | `LEADERBOARD_MIN_GUESSES`| no       | Minimum guesses before a player appears on the leaderboard (default 20) |
 | `NEXT_PUBLIC_SITE_URL`   | no       | Canonical URL for metadata                                              |
+| `TRUST_PROXY_HEADERS`    | no       | Set to `1` only behind a proxy you control that overwrites `X-Forwarded-For`. Not needed on Vercel |
 
 ## Generating AI posts
 
@@ -194,6 +196,17 @@ It's a standard Next.js app: `npm run build && npm run start` with the same env 
 ## Security notes
 
 - PINs are hashed with bcrypt; they are never stored or logged in plain text.
+- **Deployment secrets are validated, not just length-checked** (`src/lib/secrets.ts`). Anything
+  shipped in `.env.example` is public, so placeholder and low-entropy values for `SESSION_SECRET`
+  and `ADMIN_PASSWORD` are rejected and the admin area **fails closed**: no admin session can be
+  created or verified. `.env.example` ships those two empty rather than pre-filled, the reason is
+  shown on `/admin`, and it is logged at startup.
+- **Admin sign-in throttling cannot be bypassed with headers.** `X-Forwarded-For` and `X-Real-IP`
+  are client-supplied, so they are only trusted when the platform sets them (Vercel's
+  `x-vercel-forwarded-for`) or you opt in with `TRUST_PROXY_HEADERS=1`. Admin login is throttled on
+  a fixed key that no header can vary; only failures count and a successful sign-in clears it, so
+  nobody can lock the real admin out for long. Where no trustworthy address exists, IP limits are
+  skipped rather than lumping every visitor into one shared bucket.
 - A PIN is short, so sign-in is defended in layers (`src/lib/login-guard.ts`): short fixed windows
   per username (10 / 15 min) and per IP (30 / 15 min); then *cumulative* failure counts per account
   and per IP with escalating locks (1 min, 5 min, 30 min, 2 h, 12 h, then 24 h for every further
@@ -235,6 +248,8 @@ src/
     guesses.ts likes.ts posts.ts  # mutations with consistent counters
     stats.ts             # leaderboard + site/admin stats
     avatar-icons.ts      # icon avatar codes, palettes, parsing
+    secrets.ts           # placeholder + entropy validation for deployment secrets
+    login-guard.ts       # cumulative lockouts for PIN sign-in
     rate-limit.ts        # Postgres fixed-window limiter
     seed.ts              # seeding logic (shared by CLI + admin)
     ai/                  # provider abstraction, personas, prompt, filters, generator, engagement, ghostwriting

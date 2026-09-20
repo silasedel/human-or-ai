@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "RateLimit" ALTER COLUMN "resetAt" SET DATA TYPE TIMESTAMPTZ(3);

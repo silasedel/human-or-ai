@@ -11,7 +11,7 @@ import { signupSchema } from "@/lib/validation";
 export const POST = route(async (req) => {
   assertSameOrigin(req);
   const ip = getClientIp(req);
-  await enforceRateLimit(`signup:ip:${ip}`, 10, 60 * 60);
+  if (ip) await enforceRateLimit(`signup:ip:${ip}`, 10, 60 * 60);
 
   const { username, displayName, pin } = await readJson(req, signupSchema);
 

@@ -44,6 +44,19 @@ export async function enforceRateLimit(key: string, limit: number, windowSeconds
   }
 }
 
+/** Read a window without incrementing it. Returns null when no window is active. */
+export async function peekRateLimit(key: string): Promise<{ count: number; resetAt: Date } | null> {
+  const rows = await prisma.$queryRaw<RateLimitRow[]>`
+    SELECT "count", "resetAt" FROM "RateLimit" WHERE "key" = ${key} AND "resetAt" > now()
+  `;
+  return rows[0] ?? null;
+}
+
+/** Drop a window entirely (e.g. a successful sign-in clears its failure counter). */
+export async function clearRateLimit(key: string): Promise<void> {
+  await prisma.rateLimit.deleteMany({ where: { key } });
+}
+
 /** Purge expired windows so the table stays small. Called opportunistically. */
 export async function pruneRateLimits() {
   await prisma.rateLimit.deleteMany({ where: { resetAt: { lt: new Date() } } });

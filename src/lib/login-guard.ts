@@ -93,7 +93,7 @@ async function setLock(key: string, seconds: number): Promise<void> {
  * belongs to a real human account) and the IP lock. Never throws; the caller
  * always returns the same generic 401.
  */
-export async function recordLoginFailure(userId: string | null, ip: string): Promise<void> {
+export async function recordLoginFailure(userId: string | null, ip: string | null): Promise<void> {
   const tasks: Promise<unknown>[] = [];
 
   if (userId) {
@@ -115,15 +115,17 @@ export async function recordLoginFailure(userId: string | null, ip: string): Pro
     );
   }
 
-  tasks.push(
-    (async () => {
-      const { remaining } = await checkRateLimit(`loginfail:ip:${ip}`, 1_000_000, 24 * 3600);
-      const failures = 1_000_000 - remaining;
-      if (triggersLock(failures, IP_POLICY)) {
-        await setLock(`lock:ip:${ip}`, lockSecondsFor(failures, IP_POLICY));
-      }
-    })(),
-  );
+  if (ip) {
+    tasks.push(
+      (async () => {
+        const { remaining } = await checkRateLimit(`loginfail:ip:${ip}`, 1_000_000, 24 * 3600);
+        const failures = 1_000_000 - remaining;
+        if (triggersLock(failures, IP_POLICY)) {
+          await setLock(`lock:ip:${ip}`, lockSecondsFor(failures, IP_POLICY));
+        }
+      })(),
+    );
+  }
 
   await Promise.all(tasks).catch((err) => console.error("recordLoginFailure:", err));
 }

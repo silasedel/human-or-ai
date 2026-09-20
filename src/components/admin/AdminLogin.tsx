@@ -7,7 +7,7 @@ import { ShieldCheck } from "lucide-react";
 import { Button, ErrorText, Input, Label } from "@/components/ui";
 import { SITE } from "@/lib/branding";
 
-export function AdminLogin({ configured }: { configured: boolean }) {
+export function AdminLogin({ configured, problem }: { configured: boolean; problem?: string | null }) {
   const router = useRouter();
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -42,9 +42,14 @@ export function AdminLogin({ configured }: { configured: boolean }) {
         <p className="mt-1 text-sm text-fg-muted">Enter the admin password from your environment.</p>
       </div>
       {!configured ? (
-        <ErrorText>
-          Admin is not configured. Set <code>ADMIN_PASSWORD</code> (at least 8 characters) in your environment and restart.
-        </ErrorText>
+        <div className="space-y-2">
+          <ErrorText>{problem ?? "Admin is not configured."}</ErrorText>
+          <p className="text-xs leading-relaxed text-fg-muted">
+            The admin area stays disabled until both <code>ADMIN_PASSWORD</code> and <code>SESSION_SECRET</code> are set to
+            unique, high-entropy values. Placeholder values from <code>.env.example</code> are refused on purpose. Generate
+            them with <code>openssl rand -base64 24</code> and <code>openssl rand -hex 32</code>, then redeploy.
+          </p>
+        </div>
       ) : (
         <form onSubmit={submit} className="space-y-4">
           <div>

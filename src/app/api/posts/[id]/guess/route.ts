@@ -19,7 +19,11 @@ export const POST = route<Ctx>(async (req, { params }) => {
   const user = await getCurrentUser();
   const guestId = user ? null : await ensureGuestId();
 
-  await enforceRateLimit(`guess:${user ? `u:${user.id}` : `ip:${getClientIp(req)}`}`, 300, 10 * 60);
+  // Per-viewer key: account id, else the guest cookie, else a trusted IP.
+  // Never a spoofable header, and never one bucket shared by every visitor.
+  const ip = getClientIp(req);
+  const limitKey = user ? `u:${user.id}` : guestId ? `g:${guestId}` : ip ? `ip:${ip}` : null;
+  if (limitKey) await enforceRateLimit(`guess:${limitKey}`, 300, 10 * 60);
 
   const result = await submitGuess({ postId: id, guess, userId: user?.id ?? null, guestId });
   return NextResponse.json(result, { status: result.alreadyGuessed ? 200 : 201 });

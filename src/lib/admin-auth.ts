@@ -18,9 +18,21 @@ function safeEqual(a: string, b: string): boolean {
   return timingSafeEqual(ab, bb);
 }
 
-/** Is the admin area configured at all? (ADMIN_PASSWORD must be at least 8 chars.) */
+/**
+ * The admin area is enabled only when BOTH the password and the cookie signing
+ * key are real deployment secrets. A placeholder or weak value disables admin
+ * entirely (fail closed) instead of accepting a credential that is public in
+ * .env.example. `adminConfigProblem()` explains why when it is disabled.
+ */
 export function isAdminConfigured(): boolean {
-  return env.adminPassword.length >= 8;
+  return env.adminPasswordCheck.ok && env.sessionSecretCheck.ok;
+}
+
+/** Why the admin area is disabled, or null when it is properly configured. */
+export function adminConfigProblem(): string | null {
+  if (!env.adminPasswordCheck.ok) return env.adminPasswordCheck.reason ?? "ADMIN_PASSWORD is invalid";
+  if (!env.sessionSecretCheck.ok) return env.sessionSecretCheck.reason ?? "SESSION_SECRET is invalid";
+  return null;
 }
 
 export function verifyAdminPassword(input: string): boolean {
@@ -42,6 +54,7 @@ function adminCookieOptions(maxAge: number) {
 }
 
 export async function createAdminSession(): Promise<void> {
+  if (!isAdminConfigured()) throw new HttpError(503, "Admin is not configured");
   const exp = Date.now() + ADMIN_TTL_SECONDS * 1000;
   const value = `${exp}.${sign(`admin:${exp}`)}`;
   const store = await cookies();

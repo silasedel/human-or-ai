@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { env } from "@/lib/env";
 import type { ZodType } from "zod";
 
 /** Throw this from library code to produce a clean JSON error response. */
@@ -69,10 +70,37 @@ export function assertSameOrigin(req: Request) {
   }
 }
 
-export function getClientIp(req: Request): string {
-  const forwarded = req.headers.get("x-forwarded-for");
-  if (forwarded) return forwarded.split(",")[0].trim();
-  return req.headers.get("x-real-ip") ?? "unknown";
+/**
+ * Resolve the client address from a source we actually trust.
+ *
+ * X-Forwarded-For and X-Real-IP are plain request headers: a client can send
+ * any value, so using them for rate limiting lets an attacker spread attempts
+ * across unlimited buckets. We therefore only read them when the platform sets
+ * them (Vercel's edge injects x-vercel-forwarded-for and strips client copies)
+ * or when the operator opts in with TRUST_PROXY_HEADERS=1.
+ *
+ * Returns null when no trustworthy address is available. Callers must then
+ * skip IP-based limits and rely on the identity-based ones, rather than
+ * lumping every visitor into one shared bucket.
+ */
+export function getClientIp(req: Request): string | null {
+  const fromPlatform = req.headers.get("x-vercel-forwarded-for");
+  if (fromPlatform) return normalizeIp(fromPlatform);
+
+  if (env.trustProxyHeaders) {
+    const forwarded = req.headers.get("x-forwarded-for");
+    if (forwarded) return normalizeIp(forwarded);
+    const real = req.headers.get("x-real-ip");
+    if (real) return normalizeIp(real);
+  }
+  return null;
+}
+
+function normalizeIp(headerValue: string): string | null {
+  // Left-most entry is the client as recorded by the trusted proxy.
+  const first = headerValue.split(",")[0]?.trim() ?? "";
+  if (!first || first.length > 45) return null;
+  return /^[0-9a-fA-F.:]+$/.test(first) ? first : null;
 }
 
 type RouteHandler<Ctx> = (req: Request, ctx: Ctx) => Promise<Response>;

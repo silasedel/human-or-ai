@@ -24,9 +24,13 @@ export const POST = route(async (req) => {
   const { username, pin } = await readJson(req, loginSchema);
   const ip = getClientIp(req);
 
-  await enforceRateLimit(`login:ip:${ip}`, 30, 15 * 60);
+  // The per-account limits below are header-independent and are the real
+  // control; IP limits only apply when the address comes from a trusted source.
+  if (ip) {
+    await enforceRateLimit(`login:ip:${ip}`, 30, 15 * 60);
+    await assertIpNotLocked(ip);
+  }
   await enforceRateLimit(`login:user:${username}`, 10, 15 * 60);
-  await assertIpNotLocked(ip);
 
   const user = await prisma.user.findUnique({
     where: { username },

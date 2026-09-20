@@ -123,7 +123,10 @@ model Session {
 
 /// Fixed-window rate limiting that works across serverless instances.
 model RateLimit {
-  key     String   @id
-  count   Int
-  resetAt DateTime
+  key   String @id
+  count Int
+  /// Timezone-aware on purpose: this value is written by raw SQL (now() +
+  /// interval), and a naive column would be stored in the database server's
+  /// local time but read back as UTC, skewing every "try again in ..." message.
+  resetAt DateTime @db.Timestamptz(3)
 }

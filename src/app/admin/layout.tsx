@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { isAdminAuthenticated, isAdminConfigured } from "@/lib/admin-auth";
+import { adminConfigProblem, isAdminAuthenticated, isAdminConfigured } from "@/lib/admin-auth";
 import { AdminLogin } from "@/components/admin/AdminLogin";
 import { AdminNav } from "@/components/admin/AdminNav";
 
@@ -11,7 +11,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const authed = configured && (await isAdminAuthenticated());
 
   if (!authed) {
-    return <AdminLogin configured={configured} />;
+    return <AdminLogin configured={configured} problem={configured ? null : adminConfigProblem()} />;
   }
 
   return (
